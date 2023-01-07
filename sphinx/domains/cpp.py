@@ -7387,12 +7387,29 @@ class CPPObject(ObjectDescription[ASTDeclaration]):
         if ast.objectType == 'enumerator':
             self._add_enumerator_to_parent(ast)
 
+        signode['fullname'] = str(ast.name)
+
         # note: handle_signature may be called multiple time per directive,
         # if it has multiple signatures, so don't mess with the original options.
         options = dict(self.options)
         options['tparam-line-spec'] = 'tparam-line-spec' in self.options
         self.describe_signature(signode, ast, options)
         return ast
+
+    def _object_hierarchy_parts(self, sig_node: desc_signature) -> tuple[str, ...]:
+        if not 'fullname' in sig_node:
+            return ()
+
+        return (sig_node['fullname'])
+
+    def _toc_entry_name(self, sig_node: desc_signature) -> str:
+        if not 'fullname' in sig_node:
+            return ''
+
+        if self.object_type == 'function':
+            return sig_node['fullname'] + '()'
+        else:
+            return sig_node['fullname']
 
     def before_content(self) -> None:
         lastSymbol: Symbol = self.env.temp_data['cpp:last_symbol']
